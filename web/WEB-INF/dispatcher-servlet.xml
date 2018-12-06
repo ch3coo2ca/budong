@@ -3,14 +3,18 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd
         http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context.xsd">
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task.xsd">
 
     <mvc:annotation-driven/>
+    <task:annotation-driven/>
     <mvc:default-servlet-handler/>
     <context:component-scan base-package="com.budong"/>
 
@@ -43,4 +47,28 @@
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="maxUploadSize" value="1048576" /> <!-- 1 * 1024 * 1024 b -->
     </bean>
+
+    <!-- gson Object -->
+    <bean id="gsonObj" class="com.google.gson.Gson">
+    </bean>
+
+    <!-- okhttp3 client -->
+    <bean id="client" class="okhttp3.OkHttpClient">
+    </bean>
+
+	<bean id="uploadPath" class="java.lang.String">
+		<constructor-arg value="C:\Users\wjddp\Desktop" />
+	</bean>
+
+	<!--웹소켓 핸들러 -->
+	<!-- <websocket:handlers>
+		<websocket:mapping handler="chatHandler"
+			path="/chatting" />
+		<websocket:handshake-interceptors>
+			<bean
+				class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor" />
+		</websocket:handshake-interceptors>
+	</websocket:handlers>
+
+	<bean id="chatHandler" class="com.budong.service.WebSocketHandler"></bean> -->
 </beans>

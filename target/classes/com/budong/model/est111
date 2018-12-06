@@ -1,0 +1,269 @@
+import java.awt.Image;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Vector;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+public class ParssingInfo {
+	private static String url;
+	private int pageNumber;
+	private static int maxPageNum =5;
+	private final String API_KEY = "uOWDs2N00s6QjkNkpVUFeQnprTUa%2F%2F%2F0vz6JOwAg5eVaBozK80IttzRbVoeBjX6t0Kd832v0F%2FgzkwKLqju7Dg%3D%3D";
+	private String areaCode;
+	private String startEvent;
+	private String endEvent;
+	
+	private DocumentBuilder dBuilder; 
+	private DocumentBuilderFactory dbFactoty; 
+	private Document doc;
+	
+	private Vector dataSet;
+	
+	private ImageIcon img = null;
+	
+	public ParssingInfo() {		
+		/**
+		 * parameter ?뺣낫
+		 * arrange=C    || ?뺣젹 A=?쒕ぉ, B=議고쉶, C=?섏젙?? D=?앹꽦????
+		 */
+		areaCode="1";
+		startEvent = "20170901";
+		pageNumber = 1;
+		/*try {
+			dbFactoty = DocumentBuilderFactory.newInstance();
+			dBuilder = dbFactoty.newDocumentBuilder();
+			doc = dBuilder.parse(url);
+
+			// root tag 
+			doc.getDocumentElement().normalize();
+			//		System.out.println("Root element: " + doc.getDocumentElement().getNodeName());
+			NodeList nList = doc.getElementsByTagName("response");
+			Node node = nList.item(0);
+			Element element = (Element) node;
+
+			maxPageNum = Integer.parseInt( getTagValue("totalCount", element))/10;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}*/
+	}
+
+	public void setUrl(int i) {
+		// 0 ?섏뒪?곕컻 ?뺣낫
+		switch(i) {
+		case 0:url = "http://api.visitkorea.or.kr/openapi/service/rest/KorService/"
+				+ "searchFestival?serviceKey="
+				+ API_KEY  
+				+ "&MobileOS=ETC&MobileApp=AppTest&arrange=Q&listYN=Y"
+				+ "&areaCode=" + areaCode
+				+ "&eventStartDate=" + startEvent
+				+ "&pageNo=" + pageNumber
+				+ "&eventEndDate=20170931";
+		break;
+		
+		//愿愿??뺣낫
+		case 1:
+			url = "http://api.visitkorea.or.kr/openapi/service/rest/KorService/"
+					+ "areaBasedList?ServiceKey="
+					+ API_KEY
+					+ "&areaCode=" + areaCode
+					+ "&MobileOS=ETC&MobileApp=AppTest"
+					+ "&arrange=Q"
+					+ "&pageNo=" + pageNumber;
+		break;
+		}
+	}
+	
+	
+	private static String getTagValue(String tag, Element element) {
+		NodeList nodeList = element.getElementsByTagName(tag).item(0).getChildNodes();
+		
+		Node nValue = (Node) nodeList.item(0);
+		if(nValue == null) {
+			return null;
+		}
+		return nValue.getNodeValue();
+	}
+	
+	public Vector getAreaBasedInfO() {
+		try {
+			dataSet = new Vector<>();
+			
+			while(true) {
+				setUrl(1);
+				dbFactoty = DocumentBuilderFactory.newInstance();
+				dBuilder = dbFactoty.newDocumentBuilder();
+				doc = dBuilder.parse(url);
+
+				System.out.println("url : " + url);
+				// root tag 
+				doc.getDocumentElement().normalize();
+				//		System.out.println("Root element: " + doc.getDocumentElement().getNodeName());
+				NodeList nList = doc.getElementsByTagName("item");
+
+				System.out.println("======?섏씠吏" +pageNumber+"/"+maxPageNum + "======");
+				for(int i=0; i<nList.getLength(); i++) {
+					Node node = nList.item(i);
+					if(node.getNodeType() == Node.ELEMENT_NODE) {
+						Element element = (Element) node;
+						
+						/*System.out.println("############ "+i+" Index################");
+						System.out.println("二쇱냼 : " + getTagValue("addr1", element));
+						System.out.println("?대?吏 1 二쇱냼 : " + getTagValue("firstimage", element));
+						System.out.println("?대?吏 2 二쇱냼 : " + getTagValue("firstimage2", element));
+						System.out.println("??댄? : " + getTagValue("title", element));
+						System.out.println("?꾪솕踰덊샇 : " + getTagValue("tel", element));
+						System.out.println("?쒖옉 湲곌컙 : " + getTagValue("eventstartdate", element));
+						System.out.println("?앸굹??湲곌컙 : " + getTagValue("eventenddate", element));
+						*/
+						
+						Vector v = new Vector<>();
+						v.add(getTagValue("title", element));
+						v.add(getTagValue("addr1", element));
+						URL imageURL = new URL(getTagValue("firstimage", element));
+						v.add(new ImageIcon(imageURL));
+						try {
+							v.add(getTagValue("tel", element));
+						} catch (Exception e) {
+							System.out.println("tel ?쒓렇媛 ?놁쓬");
+							v.add("-");
+						}
+						
+						dataSet.add(v);
+					}	// if end
+				}	// for end
+				System.out.println(" ------ \n page : " + pageNumber);
+				pageNumber +=1;
+				if( pageNumber > maxPageNum ) {
+					pageNumber=1;
+					break;
+				}
+			}// while end
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return dataSet;
+	}
+	
+	public Vector getEventInfo(){
+		try {
+			dataSet = new Vector<>();
+			
+			while(true) {
+				setUrl(0);
+				dbFactoty = DocumentBuilderFactory.newInstance();
+				dBuilder = dbFactoty.newDocumentBuilder();
+				doc = dBuilder.parse(url);
+
+				System.out.println("url : " + url);
+				// root tag 
+				doc.getDocumentElement().normalize();
+				//		System.out.println("Root element: " + doc.getDocumentElement().getNodeName());
+				NodeList nList = doc.getElementsByTagName("item");
+
+				System.out.println("======?섏씠吏" +pageNumber+"/"+maxPageNum + "======");
+				for(int i=0; i<nList.getLength(); i++) {
+					Node node = nList.item(i);
+					if(node.getNodeType() == Node.ELEMENT_NODE) {
+						Element element = (Element) node;
+						
+						System.out.println("############ "+i+" Index################");
+						System.out.println("二쇱냼 : " + getTagValue("addr1", element));
+						System.out.println("?대?吏 1 二쇱냼 : " + getTagValue("firstimage", element));
+						System.out.println("?대?吏 2 二쇱냼 : " + getTagValue("firstimage2", element));
+						System.out.println("??댄? : " + getTagValue("title", element));
+						try {
+							System.out.println("?꾪솕踰덊샇 : " + getTagValue("tel", element));
+						} catch (Exception e) {
+							System.out.println("?꾪솕踰덊샇 : " + "-");
+						}
+						System.out.println("?쒖옉 湲곌컙 : " + getTagValue("eventstartdate", element));
+						System.out.println("?앸굹??湲곌컙 : " + getTagValue("eventenddate", element));
+						
+						Vector v = new Vector<>();
+						v.add(getTagValue("title", element));
+						v.add(getTagValue("addr1", element));
+						v.add(getTagValue("firstimage", element));
+						v.add(getTagValue("firstimage2", element));
+						//start Time
+						String str = getTagValue("eventstartdate", element);
+						Date date = new SimpleDateFormat("yyyyMMdd").parse(str);
+						str = new SimpleDateFormat("yyyy-MM-dd").format(date);
+						v.add(str);
+						//end Time
+						str = getTagValue("eventenddate", element);
+						date = new SimpleDateFormat("yyyyMMdd").parse(str);
+						str = new SimpleDateFormat("yyyy-MM-dd").format(date);
+						v.add(str);
+						try {
+							v.add(getTagValue("tel", element));
+						} catch (Exception e) {
+							v.add("-");
+						}
+						
+						dataSet.add(v);
+					}	// if end
+				}	// for end
+
+				pageNumber +=1;
+				System.out.println(" ------ \n page : " + pageNumber);
+				if( pageNumber > maxPageNum ) {
+					break;
+				}
+			}
+		
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return dataSet;
+	}
+	
+	
+	
+	public String getAreaCode() {
+		return areaCode;
+	}
+
+	public void setAreaCode(String areaCode) {
+		this.areaCode = areaCode;
+	}
+
+	public String getStartEvent() {
+		return startEvent;
+	}
+
+	public void setStartEvent(String startEvent) {
+		this.startEvent = startEvent;
+	}
+	
+
+	public String getEndEvent() {
+		return endEvent;
+	}
+
+	public void setEndEvent(String endEvent) {
+		this.endEvent = endEvent;
+	}
+
+	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
+		ParssingInfo p = new ParssingInfo();
+		
+		p.getEventInfo();
+		//p.getAreaBasedInfO();
+	}
+}

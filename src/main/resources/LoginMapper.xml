@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.budong.model.interfaces.MemberDAO">
     <select id="login" parameterType="com.budong.model.dto.MemberDTO" resultType="com.budong.model.dto.MemberDTO">
-        select * from JSP_LOGIN where ID=#{id} and PASSWORD=#{password}
+        select * from budong_member where mem_id=#{mem_id} and mem_pw=#{mem_pw}
     </select>
 </mapper> 
  

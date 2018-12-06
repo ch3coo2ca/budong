@@ -9,7 +9,8 @@
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
 			<param-value>/WEB-INF/dispatcher-servlet.xml</param-value>
-		</init-param>
+		</init-param> 
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>dispatcher</servlet-name>
