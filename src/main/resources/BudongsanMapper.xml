@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.budong.model.interfaces.BudongsanInfoDAO">
+
+    <select id="getApartmentDealInfoByYear" parameterType="int"
+            resultType="com.budong.model.dto.BudongsanApartmentDealDTO">
+        select *
+        from BUDONGSAN
+        where BUDONGSAN.year = #{year}
+    </select>
+
+    <select id="getApartmentDealInfoByYearMonth" parameterType="map"
+            resultType="com.budong.model.dto.BudongsanApartmentDealDTO">
+        select *
+        from BUDONGSAN
+        where BUDONGSAN.year = #{year}
+          and BUDONGSAN.month = #{month}
+    </select>
+
+    <select id="getApartmentDealPriceYearAvg" parameterType="map"
+            resultType="com.budong.model.json.ApartmentPriceYearAvg">
+        select BUDONGSAN.YEAR, avg(TO_NUMBER(REPLACE(BUDONGSAN.PRICE, ',', ''))) avg
+        from BUDONGSAN
+        where BUDONGSAN.YEAR between #{yearFrom} and #{yearTo}
+        group by BUDONGSAN.YEAR
+        order by BUDONGSAN.YEAR
+    </select>
+
+    <select id="getApartmentDealPriceYearMonthAvg" parameterType="map"
+            resultType="com.budong.model.json.ApartmentPriceYearMonthAvg">
+        select BUDONGSAN.YEAR, BUDONGSAN.MONTH, avg(TO_NUMBER(REPLACE(BUDONGSAN.PRICE, ',', ''))) avg
+        from BUDONGSAN
+        where BUDONGSAN.YEAR = #{year}
+          and BUDONGSAN.MONTH between #{monthFrom} and #{monthTo}
+        group by BUDONGSAN.YEAR, BUDONGSAN.MONTH
+        order by BUDONGSAN.MONTH
+    </select>
+
+    <select id="getApartmentDealPriceYearDistrictCodeAvg" parameterType="map"
+            resultType="com.budong.model.json.ApartmentPriceYearDistrictCodeAvg">
+        select s.YEAR, s.MONTH, s.DISTRICTCODE, avg(TO_NUMBER(REPLACE(s.PRICE, ',', ''))) avg
+        from BUDONGSAN s
+        where s.DISTRICTCODE = #{districtCode}
+          and s.YEAR = #{year}
+        group by s.YEAR, s.MONTH, s.DISTRICTCODE
+        order by s.MONTH
+    </select>
+
+    <insert id="updateData" parameterType="com.budong.model.dto.BudongsanApartmentDealDTO">
+        merge into BUDONGSAN
+        using dual
+        on (
+            ALOTNUMBERADDRESS = #{aLotNumberAddress}
+            and YEAR = #{year}
+            and MONTH = #{month}
+            and DAY = #{day}
+            and FLOOR = #{floor}
+            and APARTMENTNAME = #{apartmentName}
+        )
+        when not matched then
+            insert values (#{aLotNumberAddress}, #{districtCode}, #{year}, #{month}, #{day},
+                           #{districtName}, #{floor}, #{price}, #{apartmentName}, #{constructionYear},
+                           #{netArea})
+    </insert>
+
+    <!-- 지역 내 세부 정보 제공 가능성이 있음 id만 바꾸면 사용가능 -->
+    <!--<select id="getApartmentDealPriceYearDistrictCodeAvg" parameterType="map"
+            resultType="com.budong.model.json.ApartmentPriceYearDistrictCodeAvg       select s.YEAR, s.MONTH, s.DISTRICTCODE, s.DISTRICTNAME, avg(TO_NUMBER(REPLACE(s.PRICE,',',''))) avg
+        from BUDONGSAN s
+        where s.DISTRICTCODE=#{districtCode} and s.YEAR between #{yearFrom} and #{yearTo}
+        group by s.DISTRICTCODE, s.DISTRICTNAME, s.YEAR, s.MONTH
+        order by s.MONTH
+    </select>-->
+</mapper>

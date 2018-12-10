@@ -11,7 +11,13 @@
 <title></title>
 </head>
 <body>
-    메롱메롱 
-    <a href="test/realState.do">이동</a>
+	메롱메롱
+	<a href="test/realState.do">이동</a>
+
+	<!--ljy-->
+	<div align="center">
+		<a href="chatHome.do">채팅 바로가기</a>
+	</div>
+
 </body>
 </html>
